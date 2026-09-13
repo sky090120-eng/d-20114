@@ -1,6 +1,6 @@
 import pandas as pd
-import plotly.express as px
 import streamlit as st
+import plotly.express as px
 
 # -----------------------------------------------------------------------------
 # [1. 데이터 불러오기]
@@ -8,23 +8,21 @@ import streamlit as st
 # -----------------------------------------------------------------------------
 DATA_URL = "https://raw.githubusercontent.com/keep-growing-park/data-science/refs/heads/main/dataset/kobis_1year_boxoffice.csv"
 
-
 @st.cache_data
 def load_data():
     # 1. 데이터 불러오기
     df = pd.read_csv(DATA_URL)
-
+    
     # 2. [날짜 전처리] 결측치가 있는 행 삭제
     df = df.dropna()
-
+    
     # 3. [날짜 전처리] "기준일자" 컬럼을 datetime 형식으로 변환
     df["기준일자"] = pd.to_datetime(df["기준일자"])
-
+    
     # 4. [날짜 전처리] 기준일자 오름차순 정렬
     df = df.sort_values(by="기준일자", ascending=True)
-
+    
     return df
-
 
 # 데이터 로드 실행
 data = load_data()
@@ -39,9 +37,7 @@ st.title("🎬 영화 박스오피스 데이터 분석")
 # [3. 영화 선택 기능]
 # -----------------------------------------------------------------------------
 # 영화별 최대 누적관객수를 구해 누적관객수 내림차순으로 영화 목록 정렬
-movie_audience = (
-    data.groupby("영화명")["누적관객수"].max().sort_values(ascending=False)
-)
+movie_audience = data.groupby("영화명")["누적관객수"].max().sort_values(ascending=False)
 movie_list = movie_audience.index.tolist()
 
 # 사이드바에서 영화 선택 (기본값: 첫 번째 영화)
@@ -51,24 +47,24 @@ selected_movie = st.sidebar.selectbox("영화 선택", movie_list)
 filtered_data = data[data["영화명"] == selected_movie]
 
 # -----------------------------------------------------------------------------
-# [5. 구역 나누기] 섹션 1: 선택한 영화의 일별 관객 수 추이
+# 첫 번째 그래프: 일자별 관객 수 변화 (선 그래프)
 # -----------------------------------------------------------------------------
 st.subheader(f"📌 {selected_movie} - 일자별 관객 수 변화")
 
-# [4. 선그래프 그리기] Plotly를 활용한 선 그래프 생성
+# Plotly 선 그래프 생성
 fig1 = px.line(
     filtered_data,
     x="기준일자",
     y="해당일관객수",
-    title=f"{selected_movie} 일별 관객 수",
+    title=f"{selected_movie} 일별 관객 수 추이",
     labels={"기준일자": "날짜", "해당일관객수": "관객 수"},
-    markers=True,
+    markers=True
 )
 
 # 그래프 화면에 출력
 st.plotly_chart(fig1, use_container_width=True)
 
-# [5. 기타] 그래프 하단 설명 문구 영역
+# 그래프 하단 설명 문구 영역
 st.info(
     "💡 **이 그래프로 알 수 있는 것:** "
     "개봉 이후 날짜가 지남에 따라 일별 관객 수가 어떻게 변하는지(상승/하락세)를 파악할 수 있습니다."
@@ -77,13 +73,24 @@ st.info(
 st.divider()
 
 # -----------------------------------------------------------------------------
-# [5. 구역 나누기] 섹션 2: 향후 추가 그래프를 위한 예시 구역
+# 두 번째 그래프: 기준일자별 누적관객수 변화 (영역 차트)
 # -----------------------------------------------------------------------------
-st.subheader("📌 추후 추가할 그래프 구역")
-st.write("이 공간에 새로운 그래프와 분석 결과를 자유롭게 추가할 수 있습니다.")
+st.subheader(f"📌 {selected_movie} - 기준일자별 누적관객수 변화")
 
-# 향후 추가될 그래프 하단 설명 영역 예시
+# Plotly 영역 차트(Area Chart) 생성
+fig2 = px.area(
+    filtered_data,
+    x="기준일자",
+    y="누적관객수",
+    title=f"{selected_movie} 누적관객수 추이",
+    labels={"기준일자": "날짜", "누적관객수": "누적 관객 수"}
+)
+
+# 그래프 화면에 출력
+st.plotly_chart(fig2, use_container_width=True)
+
+# 그래프 하단 설명 문구 영역
 st.info(
     "💡 **이 그래프로 알 수 있는 것:** "
-    "(추가 예정) 새롭게 추가될 데이터의 핵심 인사이트 한 문장을 여기에 적어주세요."
+    "시간 경과에 따라 누적관객수가 증가하는 속도와 최종 집계 관객 수의 전체 규모를 한눈에 시각적으로 파악할 수 있습니다."
 )
