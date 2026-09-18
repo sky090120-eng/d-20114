@@ -17,10 +17,8 @@ def load_data():
     url = "https://raw.githubusercontent.com/greatsong/modudata/main/data/kobis_movies.csv"
     df = pd.read_csv(url)
 
-    # genre 열에서 첫 번째 장르만 추출 ('|' 구분자 처리)
-    df["genre"] = (
-        df["genre"].astype(str).apply(lambda x: x.split("|")[0].strip())
-    )
+    # PyArrow 호환성을 위해 .str 접근자를 사용해 첫 번째 장르 추출
+    df["genre"] = df["genre"].astype(str).str.split("|").str[0].str.strip()
 
     return df
 
