@@ -46,18 +46,20 @@ st.divider()
 # ── 그래프 2. 장르별 영화 관객수 트리맵 ──
 st.header("2. 장르별 영화 관객수 분포 (트리맵)")
 
-# 장르 계층구조 내에 영화가 포함된 트리맵 생성 (칸 크기는 total_audi)
+# 중복 없는 고유 ID로 movieCd를 활용하고 표시 이름은 movieNm으로 지정
 fig2 = px.treemap(
     df,
-    path=[px.Constant("전체 장르"), "장르", "movieNm"],
+    path=[px.Constant("전체 장르"), "장르", "movieCd"],
     values="total_audi",
     color="장르",
+    hover_name="movieNm",
     title="장르 및 영화별 총 관객수",
 )
 
-# 칸에 마우스를 올리면 영화명(또는 장르명)과 총 관객수가 보이게 설정
+# 라벨에 movieCd 대신 movieNm(영화명)이 나오도록 설정
 fig2.update_traces(
-    hovertemplate="<b>%{label}</b><br>총 관객수: %{value:,}명<extra></extra>"
+    texttemplate="<b>%{hovertext}</b>",
+    hovertemplate="<b>%{hovertext}</b><br>총 관객수: %{value:,}명<extra></extra>",
 )
 
 st.plotly_chart(fig2, use_container_width=True)
