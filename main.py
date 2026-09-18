@@ -47,7 +47,6 @@ st.divider()
 # ── 그래프 2. 장르별 영화 관객수 분포 (트리맵) ──
 st.header("2. 장르별 영화 관객수 분포 (트리맵)")
 
-# 트리맵에 들어갈 데이터 노드(Root -> 장르 -> 영화) 구성
 labels = []
 parents = []
 values = []
@@ -64,7 +63,6 @@ for _, row in df.iterrows():
     parents.append(row["장르"])
     values.append(row["total_audi"])
 
-# graph_objects로 트리맵 생성
 fig2 = go.Figure(
     go.Treemap(
         labels=labels,
@@ -85,5 +83,34 @@ st.plotly_chart(fig2, use_container_width=True)
 st.text_input("이 그래프로 알 수 있는 것", key="note2")
 
 st.divider()
+
+# ── 그래프 3. 총 관객수 분포 (히스토그램) ──
+st.header("3. 총 관객수 분포 (히스토그램)")
+
+# 관객수 데이터 계산 (최고 관객 영화 및 구간 분석)
+top_movie = df.loc[df["total_audi"].idxmax()]
+top_movie_name = top_movie["movieNm"]
+top_movie_audi = top_movie["total_audi"]
+
+fig3 = px.histogram(
+    df,
+    x="total_audi",
+    nbins=30,
+    title="영화별 총 관객수 분포",
+    labels={"total_audi": "총 관객수", "count": "영화 수"},
+)
+
+fig3.update_traces(
+    hovertemplate="<b>총 관객수 구간:</b> %{x}명<br><b>영화 수:</b> %{y}편<extra></extra>"
+)
+
+st.plotly_chart(fig3, use_container_width=True)
+
+# 그래프 설명 문구 출력
+insight_text = f"대부분의 영화는 관객수 100만~200만 명 이하 구간에 밀집되어 있으며, 가장 관객이 많은 영화는 **'{top_movie_name}'**({top_movie_audi:,}명)입니다."
+
+st.text_input("이 그래프로 알 수 있는 것", value=insight_text, key="note3")
+
+st.divider()
 # 앞으로 그래프를 계속 추가할 구역
-st.header("3. (다음 그래프를 여기에 추가)")
+st.header("4. (다음 그래프를 여기에 추가)")
