@@ -14,8 +14,16 @@ DATA_URL = "https://raw.githubusercontent.com/greatsong/modudata/main/data/kobis
 def load_data():
     # 1년간 박스오피스 10위권에 든 영화 216편의 요약표를 불러옵니다
     df = pd.read_csv(DATA_URL)
+
     # 장르가 세로막대 기호(|)로 여러 개 적힌 영화는 첫 번째 장르만 씁니다
     df["장르"] = df["genre"].astype(str).str.split("|").str[0].str.strip()
+
+    # movieCd를 문자열로 변환 후, movieNm과 조합하여 고유 영화 라벨 생성 (트리맵 오류 방지)
+    df["movieCd"] = df["movieCd"].astype(str)
+    df["영화명_고유"] = (
+        df["movieNm"].astype(str) + " (" + df["movieCd"] + ")"
+    )
+
     return df
 
 
@@ -43,23 +51,22 @@ st.text_input("이 그래프로 알 수 있는 것", key="note1")
 
 st.divider()
 
-# ── 그래프 2. 장르별 영화 관객수 트리맵 ──
+# ── 그래프 2. 장르별 영화 관객수 분포 (트리맵) ──
 st.header("2. 장르별 영화 관객수 분포 (트리맵)")
 
-# 중복 없는 고유 ID로 movieCd를 활용하고 표시 이름은 movieNm으로 지정
+# path에 고유 라벨(영화명_고유)을 사용하여 ValueError 완전 방지
 fig2 = px.treemap(
     df,
-    path=[px.Constant("전체 장르"), "장르", "movieCd"],
+    path=[px.Constant("전체 장르"), "장르", "영화명_고유"],
     values="total_audi",
     color="장르",
-    hover_name="movieNm",
+    hover_data={"total_audi": ":,", "movieNm": True, "영화명_고유": False},
     title="장르 및 영화별 총 관객수",
 )
 
-# 라벨에 movieCd 대신 movieNm(영화명)이 나오도록 설정
+# 마우스 호버 시 영화명과 총 관객수가 깔끔하게 보이도록 표기 설정
 fig2.update_traces(
-    texttemplate="<b>%{hovertext}</b>",
-    hovertemplate="<b>%{hovertext}</b><br>총 관객수: %{value:,}명<extra></extra>",
+    hovertemplate="<b>%{customdata[1]}</b><br>총 관객수: %{value:,}명<extra></extra>"
 )
 
 st.plotly_chart(fig2, use_container_width=True)
