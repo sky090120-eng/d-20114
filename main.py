@@ -1,5 +1,6 @@
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 st.set_page_config(
@@ -14,16 +15,8 @@ DATA_URL = "https://raw.githubusercontent.com/greatsong/modudata/main/data/kobis
 def load_data():
     # 1년간 박스오피스 10위권에 든 영화 216편의 요약표를 불러옵니다
     df = pd.read_csv(DATA_URL)
-
     # 장르가 세로막대 기호(|)로 여러 개 적힌 영화는 첫 번째 장르만 씁니다
     df["장르"] = df["genre"].astype(str).str.split("|").str[0].str.strip()
-
-    # movieCd를 문자열로 변환 후, movieNm과 조합하여 고유 영화 라벨 생성 (트리맵 오류 방지)
-    df["movieCd"] = df["movieCd"].astype(str)
-    df["영화명_고유"] = (
-        df["movieNm"].astype(str) + " (" + df["movieCd"] + ")"
-    )
-
     return df
 
 
@@ -54,19 +47,36 @@ st.divider()
 # ── 그래프 2. 장르별 영화 관객수 분포 (트리맵) ──
 st.header("2. 장르별 영화 관객수 분포 (트리맵)")
 
-# path에 고유 라벨(영화명_고유)을 사용하여 ValueError 완전 방지
-fig2 = px.treemap(
-    df,
-    path=[px.Constant("전체 장르"), "장르", "영화명_고유"],
-    values="total_audi",
-    color="장르",
-    hover_data={"total_audi": ":,", "movieNm": True, "영화명_고유": False},
-    title="장르 및 영화별 총 관객수",
+# 트리맵에 들어갈 데이터 노드(Root -> 장르 -> 영화) 구성
+labels = []
+parents = []
+values = []
+
+# 1. 루트 노드 (장르 모음)
+for genre in df["장르"].unique():
+    labels.append(genre)
+    parents.append("")
+    values.append(df[df["장르"] == genre]["total_audi"].sum())
+
+# 2. 리프 노드 (각 장르에 속한 영화들)
+for _, row in df.iterrows():
+    labels.append(row["movieNm"])
+    parents.append(row["장르"])
+    values.append(row["total_audi"])
+
+# graph_objects로 트리맵 생성
+fig2 = go.Figure(
+    go.Treemap(
+        labels=labels,
+        parents=parents,
+        values=values,
+        branchvalues="total",
+        hovertemplate="<b>%{label}</b><br>총 관객수: %{value:,}명<extra></extra>",
+    )
 )
 
-# 마우스 호버 시 영화명과 총 관객수가 깔끔하게 보이도록 표기 설정
-fig2.update_traces(
-    hovertemplate="<b>%{customdata[1]}</b><br>총 관객수: %{value:,}명<extra></extra>"
+fig2.update_layout(
+    margin=dict(t=30, l=10, r=10, b=10), title="장르 및 영화별 총 관객수"
 )
 
 st.plotly_chart(fig2, use_container_width=True)
