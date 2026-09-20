@@ -140,5 +140,36 @@ st.plotly_chart(fig4, use_container_width=True)
 st.text_input("이 그래프로 알 수 있는 것", key="note4")
 
 st.divider()
+
+# ── 그래프 5. 주요 장르별 총 관객수 분포 (상자 그림) ──
+st.header("5. 주요 장르별 총 관객수 분포 (상자 그림)")
+
+# 10편 이상인 장르만 필터링
+genre_counts = df["장르"].value_counts()
+major_genres = genre_counts[genre_counts >= 10].index
+df_major = df[df["장르"].isin(major_genres)]
+
+fig5 = px.box(
+    df_major,
+    x="장르",
+    y="total_audi",
+    color="장르",
+    hover_name="movieNm",
+    points="outliers",  # 이상치(상자 밖 튀는 점) 표기
+    title="영화 10편 이상 주요 장르별 총 관객수 분포",
+    labels={"total_audi": "총 관객수 (명)", "장르": "장르"},
+)
+
+# 상자 밖 점(이상치) 포함 마우스 오버 시 영화명 및 총 관객수 표시
+fig5.update_traces(
+    hovertemplate="<b>%{hovertext}</b><br>총 관객수: %{y:,}명<extra></extra>"
+)
+
+st.plotly_chart(fig5, use_container_width=True)
+
+# '이 그래프로 알 수 있는 것' 한 문장을 적는 자리
+st.text_input("이 그래프로 알 수 있는 것", key="note5")
+
+st.divider()
 # 앞으로 그래프를 계속 추가할 구역
-st.header("5. (다음 그래프를 여기에 추가)")
+st.header("6. (다음 그래프를 여기에 추가)")
