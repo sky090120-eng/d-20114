@@ -223,5 +223,33 @@ st.plotly_chart(fig7, use_container_width=True)
 st.text_input("이 그래프로 알 수 있는 것", key="note7")
 
 st.divider()
+
+# ── 그래프 8. 10위권 유지 일수 vs 총 관객수 (산점도) ──
+st.header("8. 10위권에 오래 머문 영화는 총 관객도 많은가")
+
+fig8 = px.scatter(
+    df,
+    x="days_in_top10",
+    y="total_audi",
+    color="장르",
+    hover_name="movieNm",
+    title="10위권에 오래 머문 영화는 총 관객도 많은가",
+    labels={
+        "days_in_top10": "10위권에 머문 날수 (일)",
+        "total_audi": "총 관객수 (명)",
+        "장르": "장르",
+    },
+)
+
+fig8.update_traces(
+    hovertemplate="<b>%{hovertext}</b><br>10위권 유지: %{x}일<br>총 관객수: %{y:,}명<extra></extra>"
+)
+
+st.plotly_chart(fig8, use_container_width=True)
+
+# '이 그래프로 알 수 있는 것' 한 문장을 적는 자리
+st.text_input("이 그래프로 알 수 있는 것", key="note8")
+
+st.divider()
 # 앞으로 그래프를 계속 추가할 구역
-st.header("8. (다음 그래프를 여기에 추가)")
+st.header("9. (다음 그래프를 여기에 추가)")
