@@ -202,5 +202,26 @@ st.plotly_chart(fig6, use_container_width=True)
 st.text_input("이 그래프로 알 수 있는 것", key="note6")
 
 st.divider()
+
+# ── 그래프 7. 제작 국가 및 장르별 영화 편수 (선버스트) ──
+st.header("7. 제작 국가 및 장르별 영화 편수 (선버스트)")
+
+fig7 = px.sunburst(
+    df,
+    path=["nation", "장르"],
+    title="제작 국가 ➔ 장르 계층별 영화 편수 분포",
+    color="nation",
+)
+
+fig7.update_traces(
+    hovertemplate="<b>%{label}</b><br>영화 편수: %{value}편<br>비율: %{percentParent:.1%}<extra></extra>"
+)
+
+st.plotly_chart(fig7, use_container_width=True)
+
+# '이 그래프로 알 수 있는 것' 한 문장을 적는 자리
+st.text_input("이 그래프로 알 수 있는 것", key="note7")
+
+st.divider()
 # 앞으로 그래프를 계속 추가할 구역
-st.header("7. (다음 그래프를 여기에 추가)")
+st.header("8. (다음 그래프를 여기에 추가)")
