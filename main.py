@@ -160,7 +160,6 @@ fig5 = px.box(
     labels={"total_audi": "총 관객수 (명)", "장르": "장르"},
 )
 
-# 상자 밖 점(이상치) 포함 마우스 오버 시 영화명 및 총 관객수 표시
 fig5.update_traces(
     hovertemplate="<b>%{hovertext}</b><br>총 관객수: %{y:,}명<extra></extra>"
 )
@@ -171,5 +170,37 @@ st.plotly_chart(fig5, use_container_width=True)
 st.text_input("이 그래프로 알 수 있는 것", key="note5")
 
 st.divider()
+
+# ── 그래프 6. 스크린수 vs 총 관객수 버블 차트 (점 크기: 첫 주 관객수) ──
+st.header("6. 스크린수와 총 관객수의 관계 버블 차트 (버블 크기: 첫 주 관객수)")
+
+fig6 = px.scatter(
+    df,
+    x="first_scrn",
+    y="total_audi",
+    size="first_week_audi",
+    color="장르",
+    hover_name="movieNm",
+    hover_data={"first_week_audi": ":,"},
+    size_max=50,  # 버블의 최대 크기 설정
+    title="개봉일 스크린수 vs 총 관객수 (점 크기: 개봉 첫 주 관객수)",
+    labels={
+        "first_scrn": "개봉일 스크린수 (개)",
+        "total_audi": "총 관객수 (명)",
+        "first_week_audi": "개봉 첫 주 관객수 (명)",
+        "장르": "장르",
+    },
+)
+
+fig6.update_traces(
+    hovertemplate="<b>%{hovertext}</b><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명<br>첫 주 관객수: %{customdata[0]:,}명<extra></extra>"
+)
+
+st.plotly_chart(fig6, use_container_width=True)
+
+# '이 그래프로 알 수 있는 것' 한 문장을 적는 자리
+st.text_input("이 그래프로 알 수 있는 것", key="note6")
+
+st.divider()
 # 앞으로 그래프를 계속 추가할 구역
-st.header("6. (다음 그래프를 여기에 추가)")
+st.header("7. (다음 그래프를 여기에 추가)")
